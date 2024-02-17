@@ -1,4 +1,4 @@
-""" College Football Team Status """
+""" College Baseball Team Status """
 import asyncio
 import logging
 from datetime import timedelta
