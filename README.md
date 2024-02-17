@@ -1,5 +1,5 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
-# College Football game data in Home Assistant
+# College Baseball game data in Home Assistant
 
 This integration fetches data for an College Football team's current/future game, and creates a sensor with attributes for the details of the game. 
 
@@ -12,7 +12,7 @@ The default API in the "const.py" has a limit on amount of games it can pull. It
 
 After install and restarting, navigate to
 /config/custom_components/college_football/const.py
-API_ENDPOINT = "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=80"
+API_ENDPOINT = "https://site.api.espn.com/apis/site/v2/sports/football/college-baseball/scoreboard"
 change "groups=XX" to one of the numbers below, ideally whichever conference your team is in. Restart HA and you should beable to find your team every week. 
 
 ## Conference Group Numbers
@@ -127,7 +127,7 @@ Look for the integration labeled "college_football" and enter your team's acrony
 To create a sensor instance add the following configuration to your sensor definitions using the team_id found above:
 
 ```
-- platform: college_football
+- platform: college_baseball
   team_id: 'TTU'
 ```
 
