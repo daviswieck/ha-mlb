@@ -1,0 +1,12 @@
+{
+    "domain": "college_baseball",
+    "name": "College Baseball",
+    "version": "0.6",
+    "documentation": "https://github.com/daviswieck/ha-college-baseball",
+    "issue_tracker": "https://github.com/daviswieck/ha-college-baseball/issues",
+    "dependencies": [],
+    "codeowners": ["@gopher_dave"],
+    "config_flow": true,
+    "requirements": ["arrow"],
+    "iot_class": "cloud_polling"
+  }
