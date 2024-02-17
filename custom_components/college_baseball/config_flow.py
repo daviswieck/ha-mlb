@@ -1,4 +1,4 @@
-"""Adds config flow for College Football."""
+"""Adds config flow for College Baseball."""
 from __future__ import annotations
 
 import logging
