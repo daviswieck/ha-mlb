@@ -65,7 +65,7 @@ def _get_team_list() -> list:
 
 
 @config_entries.HANDLERS.register(DOMAIN)
-class MLBScoresFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
+class MLBBaseballScoresFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for MLB Baseball."""
 
     VERSION = 2
@@ -114,10 +114,10 @@ class MLBScoresFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
-        return MLBScoresOptionsFlow(config_entry)
+        return MLBBaseballScoresOptionsFlow(config_entry)
 
 
-class MLBScoresOptionsFlow(config_entries.OptionsFlow):
+class MLBBaseballScoresOptionsFlow(config_entries.OptionsFlow):
     """Options flow for MLB Baseball."""
 
     def __init__(self, config_entry):
