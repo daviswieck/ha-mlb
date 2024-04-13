@@ -8,7 +8,7 @@ CONF_TEAM_ID = "team_id"
 
 # Defaults
 DEFAULT_ICON = "mdi:baseball"
-DEFAULT_NAME = "College_Baseball"
+DEFAULT_NAME = "MLB"
 DEFAULT_TIMEOUT = 240
 
 # Misc
