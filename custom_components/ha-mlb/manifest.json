@@ -1,6 +1,6 @@
 {
-    "domain": "college_baseball",
-    "name": "College Baseball",
+    "domain": "ha-mlb",
+    "name": "MLB Baseball",
     "version": "0.6",
     "documentation": "https://github.com/daviswieck/ha-college-baseball",
     "issue_tracker": "https://github.com/daviswieck/ha-college-baseball/issues",
