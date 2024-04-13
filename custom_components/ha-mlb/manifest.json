@@ -1,12 +1,14 @@
 {
     "domain": "ha-mlb",
     "name": "MLB Baseball",
-    "version": "0.6",
-    "documentation": "https://github.com/daviswieck/ha-college-baseball",
-    "issue_tracker": "https://github.com/daviswieck/ha-college-baseball/issues",
+    "version": "0.7",
+    "documentation": "https://github.com/daviswieck/ha-mlb",
+    "issue_tracker": "https://github.com/daviswieck/ha-mlb/issues",
     "dependencies": [],
     "codeowners": ["@gopher_dave"],
     "config_flow": true,
-    "requirements": ["arrow"],
-    "iot_class": "cloud_polling"
-  }
+    "requirements": ["arrow", "aiohttp"],
+    "iot_class": "cloud_polling",
+    "codeowners": ["@gopher_dave"],
+    "entity_category": "sports"
+}
