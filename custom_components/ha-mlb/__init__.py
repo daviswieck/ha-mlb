@@ -33,18 +33,15 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Load the saved entities."""
+    """Set up MLB Baseball from a config entry."""
     _LOGGER.info(
         "MLB Baseball version %s is starting, if you have any issues please report them here: %s",
         VERSION,
         ISSUE_URL,
     )
 
-    # Migrate entry if needed
-    if entry.version != 2:
-        await async_migrate_entry(hass, entry)
-
-    entry.add_update_listener(update_listener)
+    # Initialize the data dictionary for the integration if not already present
+    hass.data.setdefault(DOMAIN, {})
 
     # Setup the data coordinator
     coordinator = MLBBaseballDataUpdateCoordinator(
@@ -54,13 +51,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Fetch initial data so we have data when entities subscribe
     await coordinator.async_refresh()
 
+    # Store the coordinator in hass.data under the entry_id key
     hass.data[DOMAIN][entry.entry_id] = {
         COORDINATOR: coordinator,
     }
 
     # Forward setup to platforms
     await hass.config_entries.async_forward_entry_setup(entry, "sensor")
+
     return True
+
 
 
 
