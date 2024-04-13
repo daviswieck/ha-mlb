@@ -34,22 +34,17 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Load the saved entities."""
-    # Print startup message
     _LOGGER.info(
         "MLB Baseball version %s is starting, if you have any issues please report them here: %s",
         VERSION,
         ISSUE_URL,
     )
-    hass.data.setdefault(DOMAIN, {})
+
+    # Migrate entry if needed
+    if entry.version != 2:
+        await async_migrate_entry(hass, entry)
 
     entry.add_update_listener(update_listener)
-
-    if entry.unique_id is not None:
-        hass.config_entries.async_update_entry(entry, unique_id=None)
-
-        ent_reg = async_get(hass)
-        for entity in async_entries_for_config_entry(ent_reg, entry.entry_id):
-            ent_reg.async_update_entity(entity.entity_id, new_unique_id=entry.entry_id)
 
     # Setup the data coordinator
     coordinator = MLBBaseballDataUpdateCoordinator(
@@ -63,8 +58,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         COORDINATOR: coordinator,
     }
 
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    # Forward setup to platforms
+    await hass.config_entries.async_forward_entry_setup(entry, "sensor")
     return True
+
 
 
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
@@ -89,26 +86,26 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
 
 async def update_listener(hass, entry):
     """Update listener."""
-
     _LOGGER.debug("Attempting to reload entities from the %s integration", DOMAIN)
 
-    if config_entry.data == config_entry.options:
+    if entry.data == entry.options:
         _LOGGER.debug("No changes detected not reloading entities.")
         return
 
-    new_data = config_entry.options.copy()
+    new_data = entry.options.copy()
 
     hass.config_entries.async_update_entry(
-        entry=config_entry,
+        entry=entry,
         data=new_data,
     )
 
-    await hass.config_entries.async_reload(config_entry.entry_id)
+    await hass.config_entries.async_reload(entry.entry_id)
+
 
 async def async_migrate_entry(hass, config_entry):
     """Migrate an old config entry."""
     version = config_entry.version
-    # 1-> 2: Migration format
+    # 1 -> 2: Migration format
     if version == 1:
         _LOGGER.debug("Migrating from version %s", version)
         updated_config = config_entry.data.copy()
