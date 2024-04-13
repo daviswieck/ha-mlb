@@ -1,15 +1,11 @@
 import logging
-import uuid
-
-import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import slugify
-from . import CollegeFootballDataUpdateCoordinator
+from . import MLBBaseballDataUpdateCoordinator
 
 from .const import (
     ATTRIBUTION,
@@ -44,7 +40,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         config.data = config
 
     # Setup the data coordinator
-    coordinator = CollegeFootballDataUpdateCoordinator(
+    coordinator = MLBBaseballDataUpdateCoordinator(
         hass,
         config,
         config[CONF_TIMEOUT],
@@ -56,15 +52,15 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     hass.data[DOMAIN][config.entry_id] = {
         COORDINATOR: coordinator,
     }
-    async_add_entities([CollegeFootballScoresSensor(hass, config)], True)
+    async_add_entities([MLBBaseballScoresSensor(hass, config)], True)
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
     """Setup the sensor platform."""
-    async_add_entities([CollegeFootballScoresSensor(hass, entry)], True)
+    async_add_entities([MLBBaseballScoresSensor(hass, entry)], True)
 
 
-class CollegeFootballScoresSensor(CoordinatorEntity):
+class MLBBaseballScoresSensor(CoordinatorEntity):
     """Representation of a Sensor."""
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -73,44 +69,6 @@ class CollegeFootballScoresSensor(CoordinatorEntity):
         self._config = entry
         self._name = entry.data[CONF_NAME]
         self._icon = DEFAULT_ICON
-        self._state = "PRE"
-        self._date = None
-        self._kickoff_in = None
-        self._quarter = None
-        self._clock = None
-        self._venue = None
-        self._location = None
-        self._tv_network = None
-        self._odds = None
-        self._overunder = None
-        self._possession = None
-        self._last_play = None
-        self._down_distance_text = None
-        self._team_abbr = None
-        self._team_id = None
-        self._team_name = None
-        self._team_record = None
-        self._team_homeaway = None
-        self._team_logo = None
-        self._team_colors = None
-        self._team_score = None
-        self._team_rank = None 
-        self._team_win_probability = None
-        self._team_timeouts = None
-        self._opponent_abbr = None
-        self._opponent_id = None
-        self._opponent_name = None
-        self._opponent_record = None
-        self._opponent_homeaway = None
-        self._opponent_logo = None
-        self._opponent_colors = None
-        self._opponent_score = None
-        self._opponent_rank = None
-        self._opponent_win_probability = None
-        self._opponent_timeouts = None
-        self._last_update = None
-        self._team_id = entry.data[CONF_TEAM_ID]
-        self.coordinator = hass.data[DOMAIN][entry.entry_id][COORDINATOR]
 
     @property
     def unique_id(self):
@@ -148,6 +106,7 @@ class CollegeFootballScoresSensor(CoordinatorEntity):
             return attrs
 
         attrs[ATTR_ATTRIBUTION] = ATTRIBUTION
+        # Map MLB Baseball data attributes here
         attrs["date"] = self.coordinator.data["date"]
         attrs["kickoff_in"] = self.coordinator.data["kickoff_in"]
         attrs["quarter"] = self.coordinator.data["quarter"]
@@ -196,17 +155,3 @@ class CollegeFootballScoresSensor(CoordinatorEntity):
     def available(self) -> bool:
         """Return if entity is available."""
         return self.coordinator.last_update_success
-
-
-    def team_colors(self, colors) -> tuple:
-        if colors is None:
-            return None
-        color_list = []
-        _LOGGER.debug("Colors: %s", colors[0])
-        color_list.append(list(self.hex_to_rgb(colors[0])))
-        color_list.append(list(self.hex_to_rgb(colors[1])))
-        return color_list
-
-    def hex_to_rgb(self, hexa) -> tuple:
-        hexa = hexa.lstrip("#")
-        return tuple(int(hexa[i : i + 2], 16) for i in (0, 2, 4))
