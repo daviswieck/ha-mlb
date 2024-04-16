@@ -75,14 +75,16 @@ class MLBBaseballScoresSensor(CoordinatorEntity):
         self._icon = DEFAULT_ICON
         self._state = "PRE"
         self._date = None
-        self._kickoff_in = None
-        self._quarter = None
+        self._first_pitch_in = None
+        self._inningr = None
         self._clock = None
         self._venue = None
         self._location = None
         self._tv_network = None
         self._odds = None
         self._overunder = None
+        self._indoor = None
+        self._notes = None
         self._possession = None
         self._last_play = None
         self._down_distance_text = None
@@ -94,9 +96,9 @@ class MLBBaseballScoresSensor(CoordinatorEntity):
         self._team_logo = None
         self._team_colors = None
         self._team_score = None
-        self._team_rank = None 
+        self._team_hits = None 
         self._team_win_probability = None
-        self._team_timeouts = None
+        self._team_errors = None
         self._opponent_abbr = None
         self._opponent_id = None
         self._opponent_name = None
@@ -105,9 +107,9 @@ class MLBBaseballScoresSensor(CoordinatorEntity):
         self._opponent_logo = None
         self._opponent_colors = None
         self._opponent_score = None
-        self._opponent_rank = None
+        self._opponent_hits = None
         self._opponent_win_probability = None
-        self._opponent_timeouts = None
+        self._opponent_errors = None
         self._last_update = None
         self._team_id = entry.data[CONF_TEAM_ID]
         self.coordinator = hass.data[DOMAIN][entry.entry_id][COORDINATOR]
@@ -149,14 +151,16 @@ class MLBBaseballScoresSensor(CoordinatorEntity):
 
         attrs[ATTR_ATTRIBUTION] = ATTRIBUTION
         attrs["date"] = self.coordinator.data["date"]
-        attrs["kickoff_in"] = self.coordinator.data["kickoff_in"]
-        attrs["quarter"] = self.coordinator.data["quarter"]
+        attrs["first_pitch_in"] = self.coordinator.data["first_pitch_in"]
+        attrs["inning"] = self.coordinator.data["inning"]
         attrs["clock"] = self.coordinator.data["clock"]
         attrs["venue"] = self.coordinator.data["venue"]
         attrs["location"] = self.coordinator.data["location"]
         attrs["tv_network"] = self.coordinator.data["tv_network"]
         attrs["odds"] = self.coordinator.data["odds"]
         attrs["overunder"] = self.coordinator.data["overunder"]
+        attrs["indoor"] = self.coordinator.data["indoor"]
+        attrs["notes"] = self.coordinator.data["notes"]
         attrs["possession"] = self.coordinator.data["possession"]
         attrs["last_play"] = self.coordinator.data["last_play"]
         attrs["down_distance_text"] = self.coordinator.data["down_distance_text"]
@@ -169,9 +173,9 @@ class MLBBaseballScoresSensor(CoordinatorEntity):
         attrs["team_colors"] = self.coordinator.data["team_colors"]
         attrs["team_colors_rgb"] = self.team_colors(self.coordinator.data["team_colors"])
         attrs["team_score"] = self.coordinator.data["team_score"]
-        attrs["team_rank"] = self.coordinator.data["team_rank"]
+        attrs["team_hits"] = self.coordinator.data["team_hits"]
+        attrs["team_errors"] = self.coordinator.data["team_errors"]
         attrs["team_win_probability"] = self.coordinator.data["team_win_probability"]
-        attrs["team_timeouts"] = self.coordinator.data["team_timeouts"]
         attrs["opponent_abbr"] = self.coordinator.data["opponent_abbr"]
         attrs["opponent_id"] = self.coordinator.data["opponent_id"]
         attrs["opponent_name"] = self.coordinator.data["opponent_name"]
@@ -183,11 +187,9 @@ class MLBBaseballScoresSensor(CoordinatorEntity):
             self.coordinator.data["opponent_colors"]
         )
         attrs["opponent_score"] = self.coordinator.data["opponent_score"]
-        attrs["opponent_rank"] = self.coordinator.data["opponent_rank"]
-        attrs["opponent_win_probability"] = self.coordinator.data[
-            "opponent_win_probability"
-        ]
-        attrs["opponent_timeouts"] = self.coordinator.data["opponent_timeouts"]
+        attrs["opponent_hits"] = self.coordinator.data["opponent_hits"]
+        attrs["opponent_errors"] = self.coordinator.data["opponent_errors"]
+        attrs["opponent_win_probability"] = self.coordinator.data["opponent_win_probability"]
         attrs["last_update"] = self.coordinator.data["last_update"]
 
         return attrs
