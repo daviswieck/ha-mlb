@@ -182,17 +182,20 @@ async def async_get_state(config) -> dict:
                 found_team = True
                 team_index = (
                     0
-                    if event["competitions"][0]["competitors"][0]["team"][
-                        "abbreviation"
-                    ]
+                    if event["competitions"][0]["competitors"][0]["team"]["abbreviation"]
                     == team_id
                     else 1
                 )
                 oppo_index = abs((team_index - 1))
                 values["state"] = event["status"]["type"]["state"].upper()
                 values["date"] = event["date"]
-                values["kickoff_in"] = arrow.get(event["date"]).humanize()
+                values["first_pitch_in"] = arrow.get(event["date"]).humanize()
                 values["venue"] = event["competitions"][0]["venue"]["fullName"]
+                values["indoor"] = event["competitions"][0]["venue"]["indoor"]
+                try: 
+                    values["notes"] = event["competitions"][0]["notes"]
+                except:
+                    values["notes"] = None
                 try:
                     values["location"] = "%s, %s" % (
                         event["competitions"][0]["venue"]["address"]["city"],
@@ -202,9 +205,7 @@ async def async_get_state(config) -> dict:
                 except:
                     values["location"] = event["competitions"][0]["venue"]["address"]["city"]
                 try:
-                    values["tv_network"] = event["competitions"][0]["broadcasts"][0][
-                        "names"
-                    ][0]
+                    values["tv_network"] = event["competitions"][0]["broadcasts"][0]["names"][0]
                 except:
                     values["tv_network"] = None
                 if event["status"]["type"]["state"].lower() in ['pre']: # odds only exist pre-game
@@ -224,92 +225,47 @@ async def async_get_state(config) -> dict:
                     values["possession"] = None
                     values["last_play"] = None
                     values["down_distance_text"] = None
-                    values["team_timeouts"] = None
-                    values["opponent_timeouts"] = None
-                    values["quarter"] = None
+                    values["opponent_errors"] = None
+                    values["inning"] = None
                     values["clock"] = None
                     values["team_win_probability"] = None
                     values["opponent_win_probability"] = None
                 else:
-                    values["quarter"] = event["status"]["period"]
+                    values["inning"] = event["status"]["period"]
                     values["clock"] = event["status"]["displayClock"]
-                    values["last_play"] = event["competitions"][0]["situation"][
-                        "lastPlay"
-                    ]["text"]
+                    values["last_play"] = event["competitions"][0]["situation"]["lastPlay"]["text"]
                     try:
-                        values["down_distance_text"] = event["competitions"][0][
-                            "situation"
-                        ]["downDistanceText"]
+                        values["down_distance_text"] = event["competitions"][0]["situation"]["downDistanceText"]
                     except:
                         values["down_distance_text"] = None
                     try:
-                                               values["possession"] = event["competitions"][0]["situation"][
-                            "possession"
-                        ]
+                        values["possession"] = event["competitions"][0]["situation"]["possession"]
                     except:
                         values["possession"] = None
                     if (
-                        event["competitions"][0]["competitors"][team_index]["homeAway"]
-                        == "home"
-                    ):
-                        values["team_timeouts"] = event["competitions"][0]["situation"][
-                            "homeTimeouts"
-                        ]
-                        values["opponent_timeouts"] = event["competitions"][0][
-                            "situation"
-                        ]["awayTimeouts"]
+                        event["competitions"][0]["competitors"][team_index]["homeAway"]  == "home"):
                         try:
-                            values["team_win_probability"] = event["competitions"][0][
-                                "situation"
-                            ]["lastPlay"]["probability"]["homeWinPercentage"]
-                            values["opponent_win_probability"] = event["competitions"][
-                                0
-                            ]["situation"]["lastPlay"]["probability"][
-                                "awayWinPercentage"
-                            ]
+                            values["team_win_probability"] = event["competitions"][0]["situation"]["lastPlay"]["probability"]["homeWinPercentage"]
+                            values["opponent_win_probability"] = event["competitions"][0]["situation"]["lastPlay"]["probability"]["awayWinPercentage"]
                         except:
                             values["team_win_probability"] = None
                             values["opponent_win_probability"] = None
                     else:
-                        values["team_timeouts"] = event["competitions"][0]["situation"][
-                            "awayTimeouts"
-                        ]
-                        values["opponent_timeouts"] = event["competitions"][0][
-                            "situation"
-                        ]["homeTimeouts"]
                         try:
-                            values["team_win_probability"] = event["competitions"][0][
-                                "situation"
-                            ]["lastPlay"]["probability"]["awayWinPercentage"]
-                            values["opponent_win_probability"] = event["competitions"][
-                                0
-                            ]["situation"]["lastPlay"]["probability"][
-                                "homeWinPercentage"
-                            ]
+                            values["team_win_probability"] = event["competitions"][0]["situation"]["lastPlay"]["probability"]["awayWinPercentage"]
+                            values["opponent_win_probability"] = event["competitions"][0]["situation"]["lastPlay"]["probability"]["homeWinPercentage"]
                         except:
                             values["team_win_probability"] = None
                             values["opponent_win_probability"] = None
-                values["team_abbr"] = event["competitions"][0]["competitors"][
-                    team_index
-                ]["team"]["abbreviation"]
-                values["team_id"] = event["competitions"][0]["competitors"][team_index][
-                    "team"
-                ]["id"]
-                values["team_name"] = event["competitions"][0]["competitors"][
-                    team_index
-                ]["team"]["shortDisplayName"]
+                values["team_abbr"] = event["competitions"][0]["competitors"][team_index]["team"]["abbreviation"]
+                values["team_id"] = event["competitions"][0]["competitors"][team_index]["team"]["id"]
+                values["team_name"] = event["competitions"][0]["competitors"][team_index]["team"]["shortDisplayName"]
                 try:
-                    values["team_record"] = event["competitions"][0]["competitors"][
-                        team_index
-                    ]["records"][0]["summary"]
+                    values["team_record"] = event["competitions"][0]["competitors"][team_index]["records"][0]["summary"]
                 except:
                     values["team_record"] = None
-                values["team_homeaway"] = event["competitions"][0]["competitors"][
-                    team_index
-                ]["homeAway"]
-                values["team_logo"] = event["competitions"][0]["competitors"][
-                    team_index
-                ]["team"]["logo"]
+                values["team_homeaway"] = event["competitions"][0]["competitors"][team_index]["homeAway"]
+                values["team_logo"] = event["competitions"][0]["competitors"][team_index]["team"]["logo"]
                 try:
                     values["team_colors"] = [
                         "".join(
@@ -338,30 +294,22 @@ async def async_get_state(config) -> dict:
                     team_index
                 ]["score"]
                 try:
-                    values["team_rank"] = event["competitions"][0]["competitors"][team_index]["curatedRank"]["current"] 
+                    values["team_hits"] = event["competitions"][0]["competitors"][team_index]["hits"]
                 except:
-                    values["team_rank"] = None
-                values["opponent_abbr"] = event["competitions"][0]["competitors"][
-                    oppo_index
-                ]["team"]["abbreviation"]
-                values["opponent_id"] = event["competitions"][0]["competitors"][
-                    oppo_index
-                ]["team"]["id"]
-                values["opponent_name"] = event["competitions"][0]["competitors"][
-                    oppo_index
-                ]["team"]["shortDisplayName"]
+                    values["team_hits"] = None
                 try:
-                    values["opponent_record"] = event["competitions"][0]["competitors"][
-                        oppo_index
-                    ]["records"][0]["summary"]
+                    values["team_errors"] = event["competitions"][0]["competitors"][team_index]["errors"]
+                except:
+                    values["team_errors"] = None
+                values["opponent_abbr"] = event["competitions"][0]["competitors"][oppo_index]["team"]["abbreviation"]
+                values["opponent_id"] = event["competitions"][0]["competitors"][oppo_index]["team"]["id"]
+                values["opponent_name"] = event["competitions"][0]["competitors"][oppo_index]["team"]["shortDisplayName"]
+                try:
+                    values["opponent_record"] = event["competitions"][0]["competitors"][oppo_index]["records"][0]["summary"]
                 except:
                     values["opponent_record"] = None
-                values["opponent_homeaway"] = event["competitions"][0]["competitors"][
-                    oppo_index
-                ]["homeAway"]
-                values["opponent_logo"] = event["competitions"][0]["competitors"][
-                    oppo_index
-                ]["team"]["logo"]
+                values["opponent_homeaway"] = event["competitions"][0]["competitors"][oppo_index]["homeAway"]
+                values["opponent_logo"] = event["competitions"][0]["competitors"][oppo_index]["team"]["logo"]
                 try:
                     values["opponent_colors"] = [
                         "".join(
@@ -390,9 +338,14 @@ async def async_get_state(config) -> dict:
                     oppo_index
                 ]["score"]
                 try:
-                    values["opponent_rank"] = event["competitions"][0]["competitors"][oppo_index]["curatedRank"]["current"] 
+                    values["opponent_hits"] = event["competitions"][0]["competitors"][oppo_index]["hits"]
                 except:
-                    values["opponent_rank"] = None
+                    values["opponent_hits"] = None
+                    
+                try:
+                    values["opponent_errors"] = event["competitions"][0]["competitors"][oppo_index]["errors"]
+                except:
+                    values["opponent_errors"] = None
                 values["last_update"] = arrow.now().format(arrow.FORMAT_W3C)
                 values["private_fast_refresh"] = False
         
@@ -455,14 +408,16 @@ async def async_clear_states(config) -> dict:
     # Reset values
     values = {
         "date": None,
-        "kickoff_in": None,
-        "quarter": None,
+        "first_pitch_in": None,
+        "inning": None,
         "clock": None,
         "venue": None,
         "location": None,
+        "indoor": None,
         "tv_network": None,
         "odds": None,
         "overunder": None,
+        "notes": None,
         "last_play": None,
         "down_distance_text": None,
         "possession": None,
@@ -471,9 +426,9 @@ async def async_clear_states(config) -> dict:
         "team_homeaway": None,
         "team_colors": None,
         "team_score": None,
-        "team_rank": None, 
+        "team_hits": None, 
         "team_win_probability": None,
-        "team_timeouts": None,
+        "team_errors": None,
         "opponent_abbr": None,
         "opponent_id": None,
         "opponent_name": None,
@@ -482,9 +437,9 @@ async def async_clear_states(config) -> dict:
         "opponent_logo": None,
         "opponent_colors": None,
         "opponent_score": None,
-        "opponent_rank": None,
+        "opponent_hits": None,
         "opponent_win_probability": None,
-        "opponent_timeouts": None,
+        "opponent_errors": None,
         "last_update": None,
         "private_fast_refresh": False,
     }
