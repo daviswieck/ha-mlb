@@ -40,26 +40,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         ISSUE_URL,
     )
 
-    # Initialize the data dictionary for the integration if not already present
     hass.data.setdefault(DOMAIN, {})
 
-    # Setup the data coordinator
     coordinator = MLBBaseballDataUpdateCoordinator(
         hass, entry.data, entry.data.get(CONF_TIMEOUT)
     )
 
-    # Fetch initial data so we have data when entities subscribe
     await coordinator.async_refresh()
 
-    # Store the coordinator in hass.data under the entry_id key
     hass.data[DOMAIN][entry.entry_id] = {
         COORDINATOR: coordinator,
     }
 
-    # Forward setup to platforms
-    await hass.config_entries.async_forward_entry_setup(entry, "sensor")
+    await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])  # <- updated here
 
     return True
+
 
 
 
