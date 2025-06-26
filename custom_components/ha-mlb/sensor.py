@@ -1,16 +1,11 @@
 import logging
-import uuid
-
-import voluptuous as vol
-from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import slugify
-from . import MLBBaseballDataUpdateCoordinator
 
+from . import MLBBaseballDataUpdateCoordinator
 from .const import (
     ATTRIBUTION,
     CONF_TIMEOUT,
@@ -24,119 +19,43 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_TEAM_ID): cv.string,
-        vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
-        vol.Optional(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): int,
-    }
-)
+# Remove async_setup_platform to enforce config entries only
+# async_setup_platform deprecated for config entries integration
 
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    """Configuration from yaml"""
-    if DOMAIN not in hass.data.keys():
-        hass.data.setdefault(DOMAIN, {})
-        config.entry_id = slugify(f"{config.get(CONF_TEAM_ID)}")
-        config.data = config
-    else:
-        config.entry_id = slugify(f"{config.get(CONF_TEAM_ID)}")
-        config.data = config
-
-    # Setup the data coordinator
-    coordinator = MLBBaseballDataUpdateCoordinator(
-        hass,
-        config,
-        config[CONF_TIMEOUT],
-    )
-
-    # Fetch initial data so we have data when entities subscribe
-    await coordinator.async_refresh()
-
-    hass.data[DOMAIN][config.entry_id] = {
-        COORDINATOR: coordinator,
-    }
-    async_add_entities([MLBBaseballScoresSensor(hass, config)], True)
-
-
-async def async_setup_entry(hass, entry, async_add_entities):
-    """Setup the sensor platform."""
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
+    """Set up the sensor platform from a config entry."""
     async_add_entities([MLBBaseballScoresSensor(hass, entry)], True)
 
 
 class MLBBaseballScoresSensor(CoordinatorEntity):
-    """Representation of a Sensor."""
+    """Representation of a MLB Baseball Score sensor."""
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Initialize the sensor."""
         super().__init__(hass.data[DOMAIN][entry.entry_id][COORDINATOR])
         self._config = entry
-        self._name = entry.data[CONF_NAME]
+        self._name = entry.data.get(CONF_NAME, DEFAULT_NAME)
         self._icon = DEFAULT_ICON
+
+        # Initialize state attributes to None
         self._state = "PRE"
-        self._date = None
-        self._first_pitch_in = None
-        self._inning = None
-        self._clock = None
-        self._venue = None
-        self._location = None
-        self._tv_network = None
-        self._odds = None
-        self._overunder = None
-        self._spread = None
-        self._indoor = None
-        self._weather = None
-        self._temperature = None
-        self._attendance = None
-        self._notes = None
-        self._outs = None
-        self._balls = None
-        self._strikes = None
-        self._last_play = None
-        self._alt_last_play = None
-        self._onFirst = None
-        self._onSecond = None
-        self._onThird = None
-        self._team_abbr = None
-        self._team_id = None
-        self._team_name = None
-        self._team_record = None
-        self._team_homeaway = None
-        self._team_logo = None
-        self._team_colors = None
-        self._team_score = None
-        self._team_hits = None 
-        self._team_win_probability = None
-        self._team_errors = None
-        self._opponent_abbr = None
-        self._opponent_id = None
-        self._opponent_name = None
-        self._opponent_record = None
-        self._opponent_homeaway = None
-        self._opponent_logo = None
-        self._opponent_colors = None
-        self._opponent_score = None
-        self._opponent_hits = None
-        self._opponent_win_probability = None
-        self._opponent_errors = None
-        self._last_update = None
-        self._team_id = entry.data[CONF_TEAM_ID]
+
+        self._team_id = entry.data.get(CONF_TEAM_ID)
         self.coordinator = hass.data[DOMAIN][entry.entry_id][COORDINATOR]
 
     @property
-    def unique_id(self):
-        """
-        Return a unique, Home Assistant friendly identifier for this entity.
-        """
+    def unique_id(self) -> str:
+        """Return a unique, Home Assistant friendly identifier for this entity."""
         return f"{slugify(self._name)}_{self._config.entry_id}"
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Return the name of the sensor."""
         return self._name
 
     @property
-    def icon(self):
+    def icon(self) -> str:
         """Return the icon to use in the frontend, if any."""
         return self._icon
 
@@ -145,70 +64,67 @@ class MLBBaseballScoresSensor(CoordinatorEntity):
         """Return the state of the sensor."""
         if self.coordinator.data is None:
             return None
-        elif "state" in self.coordinator.data.keys():
-            return self.coordinator.data["state"]
-        else:
-            return None
+        return self.coordinator.data.get("state")
 
     @property
-    def extra_state_attributes(self):
-        """Return the state message."""
+    def extra_state_attributes(self) -> dict:
+        """Return the state attributes."""
         attrs = {}
 
         if self.coordinator.data is None:
             return attrs
 
+        data = self.coordinator.data
+
         attrs[ATTR_ATTRIBUTION] = ATTRIBUTION
-        attrs["date"] = self.coordinator.data["date"]
-        attrs["first_pitch_in"] = self.coordinator.data["first_pitch_in"]
-        attrs["inning"] = self.coordinator.data["inning"]
-        attrs["clock"] = self.coordinator.data["clock"]
-        attrs["venue"] = self.coordinator.data["venue"]
-        attrs["location"] = self.coordinator.data["location"]
-        attrs["tv_network"] = self.coordinator.data["tv_network"]
-        attrs["odds"] = self.coordinator.data["odds"]
-        attrs["overunder"] = self.coordinator.data["overunder"]
-        attrs["spread"] = self.coordinator.data["spread"]
-        attrs["indoor"] = self.coordinator.data["indoor"]
-        attrs["weather"] = self.coordinator.data["weather"]
-        attrs["temperature"] = self.coordinator.data["temperature"]
-        attrs["attendance"] = self.coordinator.data["attendance"]
-        attrs["notes"] = self.coordinator.data["notes"]
-        attrs["outs"] = self.coordinator.data["outs"]
-        attrs["balls"] = self.coordinator.data["balls"]
-        attrs["strikes"] = self.coordinator.data["strikes"]
-        attrs["last_play"] = self.coordinator.data["last_play"]
-        attrs["alt_last_play"] = self.coordinator.data["alt_last_play"]
-        attrs["onFirst"] = self.coordinator.data["onFirst"]
-        attrs["onSecond"] = self.coordinator.data["onSecond"]
-        attrs["onThird"] = self.coordinator.data["onThird"]
-        attrs["team_abbr"] = self.coordinator.data["team_abbr"]
-        attrs["team_id"] = self.coordinator.data["team_id"]
-        attrs["team_name"] = self.coordinator.data["team_name"]
-        attrs["team_record"] = self.coordinator.data["team_record"]
-        attrs["team_homeaway"] = self.coordinator.data["team_homeaway"]
-        attrs["team_logo"] = self.coordinator.data["team_logo"]
-        attrs["team_colors"] = self.coordinator.data["team_colors"]
-        attrs["team_colors_rgb"] = self.team_colors(self.coordinator.data["team_colors"])
-        attrs["team_score"] = self.coordinator.data["team_score"]
-        attrs["team_hits"] = self.coordinator.data["team_hits"]
-        attrs["team_errors"] = self.coordinator.data["team_errors"]
-        attrs["team_win_probability"] = self.coordinator.data["team_win_probability"]
-        attrs["opponent_abbr"] = self.coordinator.data["opponent_abbr"]
-        attrs["opponent_id"] = self.coordinator.data["opponent_id"]
-        attrs["opponent_name"] = self.coordinator.data["opponent_name"]
-        attrs["opponent_record"] = self.coordinator.data["opponent_record"]
-        attrs["opponent_homeaway"] = self.coordinator.data["opponent_homeaway"]
-        attrs["opponent_logo"] = self.coordinator.data["opponent_logo"]
-        attrs["opponent_colors"] = self.coordinator.data["opponent_colors"]
-        attrs["opponent_colors_rgb"] = self.team_colors(
-            self.coordinator.data["opponent_colors"]
-        )
-        attrs["opponent_score"] = self.coordinator.data["opponent_score"]
-        attrs["opponent_hits"] = self.coordinator.data["opponent_hits"]
-        attrs["opponent_errors"] = self.coordinator.data["opponent_errors"]
-        attrs["opponent_win_probability"] = self.coordinator.data["opponent_win_probability"]
-        attrs["last_update"] = self.coordinator.data["last_update"]
+        attrs["date"] = data.get("date")
+        attrs["first_pitch_in"] = data.get("first_pitch_in")
+        attrs["inning"] = data.get("inning")
+        attrs["clock"] = data.get("clock")
+        attrs["venue"] = data.get("venue")
+        attrs["location"] = data.get("location")
+        attrs["tv_network"] = data.get("tv_network")
+        attrs["odds"] = data.get("odds")
+        attrs["overunder"] = data.get("overunder")
+        attrs["spread"] = data.get("spread")
+        attrs["indoor"] = data.get("indoor")
+        attrs["weather"] = data.get("weather")
+        attrs["temperature"] = data.get("temperature")
+        attrs["attendance"] = data.get("attendance")
+        attrs["notes"] = data.get("notes")
+        attrs["outs"] = data.get("outs")
+        attrs["balls"] = data.get("balls")
+        attrs["strikes"] = data.get("strikes")
+        attrs["last_play"] = data.get("last_play")
+        attrs["alt_last_play"] = data.get("alt_last_play")
+        attrs["onFirst"] = data.get("onFirst")
+        attrs["onSecond"] = data.get("onSecond")
+        attrs["onThird"] = data.get("onThird")
+        attrs["team_abbr"] = data.get("team_abbr")
+        attrs["team_id"] = data.get("team_id")
+        attrs["team_name"] = data.get("team_name")
+        attrs["team_record"] = data.get("team_record")
+        attrs["team_homeaway"] = data.get("team_homeaway")
+        attrs["team_logo"] = data.get("team_logo")
+        attrs["team_colors"] = data.get("team_colors")
+        attrs["team_colors_rgb"] = self.team_colors(data.get("team_colors"))
+        attrs["team_score"] = data.get("team_score")
+        attrs["team_hits"] = data.get("team_hits")
+        attrs["team_errors"] = data.get("team_errors")
+        attrs["team_win_probability"] = data.get("team_win_probability")
+        attrs["opponent_abbr"] = data.get("opponent_abbr")
+        attrs["opponent_id"] = data.get("opponent_id")
+        attrs["opponent_name"] = data.get("opponent_name")
+        attrs["opponent_record"] = data.get("opponent_record")
+        attrs["opponent_homeaway"] = data.get("opponent_homeaway")
+        attrs["opponent_logo"] = data.get("opponent_logo")
+        attrs["opponent_colors"] = data.get("opponent_colors")
+        attrs["opponent_colors_rgb"] = self.team_colors(data.get("opponent_colors"))
+        attrs["opponent_score"] = data.get("opponent_score")
+        attrs["opponent_hits"] = data.get("opponent_hits")
+        attrs["opponent_errors"] = data.get("opponent_errors")
+        attrs["opponent_win_probability"] = data.get("opponent_win_probability")
+        attrs["last_update"] = data.get("last_update")
 
         return attrs
 
@@ -217,16 +133,19 @@ class MLBBaseballScoresSensor(CoordinatorEntity):
         """Return if entity is available."""
         return self.coordinator.last_update_success
 
-
-    def team_colors(self, colors) -> tuple:
-        if colors is None:
+    @staticmethod
+    def team_colors(colors) -> list | None:
+        """Convert team colors hex list to RGB list."""
+        if not colors or len(colors) < 2:
             return None
-        color_list = []
-        _LOGGER.debug("Colors: %s", colors[0])
-        color_list.append(list(self.hex_to_rgb(colors[0])))
-        color_list.append(list(self.hex_to_rgb(colors[1])))
-        return color_list
+        try:
+            return [MLBBaseballScoresSensor.hex_to_rgb(c) for c in colors]
+        except Exception as e:
+            _LOGGER.warning("Failed to parse team colors: %s", e)
+            return None
 
-    def hex_to_rgb(self, hexa) -> tuple:
+    @staticmethod
+    def hex_to_rgb(hexa: str) -> tuple[int, int, int]:
+        """Convert hex color string to RGB tuple."""
         hexa = hexa.lstrip("#")
         return tuple(int(hexa[i : i + 2], 16) for i in (0, 2, 4))
