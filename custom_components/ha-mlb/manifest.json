@@ -1,5 +1,5 @@
 {
-    "domain": "ha-mlb",
+    "domain": "ha_mlb",
     "name": "MLB Baseball",
     "version": "0.7",
     "documentation": "https://github.com/daviswieck/ha-mlb",
