@@ -1,4 +1,4 @@
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://www.hacs.xyz/docs/faq/custom_repositories/)
 # College Baseball game data in Home Assistant
 
 This integration fetches data for an College Football team's current/future game, and creates a sensor with attributes for the details of the game. 
@@ -103,16 +103,18 @@ The attributes available will change based on the sensor's state, a small number
 
 ### Manually
 
-Clone or download this repository and copy the "college-football" directory to your "custom_components" directory in your config directory
+Clone or download this repository and copy the `ha-mlb` directory to the `custom_components` directory in your Home Assistant configuration directory.
 
-```<config directory>/custom_components/college-football/...```
+```text
+<config directory>/custom_components/ha-mlb/...
+```
   
 ### HACS
 
 1. Open the HACS section of Home Assistant.
 2. Click the "..." button in the top right corner and select "Custom Repositories."
-3. In the window that opens paste this Github URL.
-4. In the window that opens when you select it click om "Install This Repository in HACS"
+3. Add `https://github.com/daviswieck/ha-mlb` as an **Integration** repository.
+4. Select **MLB Baseball**, choose **Download**, and restart Home Assistant when prompted.
   
 ## Configuration
 

@@ -20,6 +20,6 @@ PLATFORM = "sensor"
 PLATFORMS = [PLATFORM]
 COORDINATOR = "coordinator"
 ATTRIBUTION = "Data provided by ESPN"
-VERSION = "0.1"
+VERSION = "0.7.1"
 ISSUE_URL = "https://github.com/daviswieck/ha-mlb"
 TEAM_ID = ""  # placeholder or default, probably unused

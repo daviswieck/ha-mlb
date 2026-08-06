@@ -1,14 +1,12 @@
 {
-    "domain": "ha-mlb",
-    "name": "MLB Baseball",
-    "version": "0.7",
-    "documentation": "https://github.com/daviswieck/ha-mlb",
-    "issue_tracker": "https://github.com/daviswieck/ha-mlb/issues",
-    "dependencies": [],
-    "codeowners": ["@gopher_dave"],
-    "config_flow": true,
-    "requirements": ["arrow", "aiohttp"],
-    "iot_class": "cloud_polling",
-    "codeowners": ["@gopher_dave"],
-    "entity_category": "sports"
+  "domain": "ha-mlb",
+  "name": "MLB Baseball",
+  "version": "0.7.1",
+  "documentation": "https://github.com/daviswieck/ha-mlb",
+  "issue_tracker": "https://github.com/daviswieck/ha-mlb/issues",
+  "codeowners": ["@daviswieck"],
+  "config_flow": true,
+  "requirements": ["arrow==1.4.0"],
+  "iot_class": "cloud_polling",
+  "integration_type": "service"
 }
