@@ -1,7 +1,7 @@
 {
   "domain": "ha-mlb",
   "name": "MLB Baseball",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "documentation": "https://github.com/daviswieck/ha-mlb",
   "issue_tracker": "https://github.com/daviswieck/ha-mlb/issues",
   "codeowners": ["@daviswieck"],
